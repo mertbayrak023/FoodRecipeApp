@@ -1,4 +1,5 @@
 from django import forms
+
 from Login.models import User
 
 
@@ -42,6 +43,7 @@ class UserLoginForm(forms.Form):
         username = self.cleaned_data.get('username')
         password = self.cleaned_data.get('password')
         # password'un databasede hash'li şekilde şifrelenmiştir validate_credentials bu şifreyi kırıp şifre ve kullanıcı adının var olup olmadığına bakar ve kontrol eder
+        # buna authentication islemi deniliyor
         self.validate_credentials(username, password)
         return self.cleaned_data
 

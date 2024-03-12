@@ -7,7 +7,7 @@ from Forms.views import UserRegistrationForm, UserLoginForm
 from Login.models import User
 
 
-# login ve logout için kullanılan post metodu
+# login için kullanılan post metodu
 def user_login(request):
     if request.method == 'POST':
         form = UserLoginForm(request.POST)
@@ -31,13 +31,14 @@ def user_login(request):
     return render(request, 'LoginPage.html', {'form': form})
 
 
+# logout icin kullanılan method
 def user_logout(request):
+    # kullanıcıyı arka plandan silinir
     if request.user.is_authenticated:
         logout(request)
-
     if 'userid' in request.session:
         del request.session['userid']
-
+    # kullanıcıyı sildikten sonra login sayfasına atar
     return HttpResponseRedirect('http://localhost:8000/login')
 
 

@@ -79,6 +79,7 @@ WSGI_APPLICATION = 'FoodRecipeApp.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 # Database bağlantısı için gerekli ayarlar
+# localhostta bulunan FoodRecipeDB databasine baglanır
 DATABASES = {
     "default": {
         "ENGINE": "mssql",

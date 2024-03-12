@@ -1,6 +1,5 @@
-from django.db import models
-
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.db import models
 
 
 class UserManager(BaseUserManager):
@@ -21,6 +20,8 @@ class UserManager(BaseUserManager):
 
 
 # Custom user modeli
+# databasedeki tablolarin fiziksel gosterimi
+# html ve pythonda kullanırken bu classlari kullanıcaz
 class User(AbstractBaseUser, PermissionsMixin):
     userid = models.AutoField(primary_key=True)
     username = models.CharField(max_length=20, unique=True)
@@ -41,6 +42,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         db_table = 'User'
 
 
+# Recipe tablosunun modeli
 class Recipe(models.Model):
     recipe_id = models.AutoField(primary_key=True)
     recipe_name = models.CharField(max_length=100)
