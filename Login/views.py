@@ -38,8 +38,8 @@ def user_logout(request):
         logout(request)
     if 'userid' in request.session:
         del request.session['userid']
-    # kullanıcıyı sildikten sonra login sayfasına atar
-    return HttpResponseRedirect('http://localhost:8000/login')
+    # kullanıcıyı sildikten sonra ana sayfaya atar, urls.py da belirttigimiz uzere localhost:8000 de ana sayfa var
+    return HttpResponseRedirect('http://localhost:8000')
 
 
 # register için kullanılan post metodu user_login ile aynı olarak kullanılan metodları tekrardan belirtilmemistir
@@ -53,6 +53,7 @@ def register(request):
             # register kısmı basarılı oldugu icin user_login metodu aktive ediliyor yani login sayfasına atıyor
             return redirect('login')
         else:
+            # kayıt surecinde bir hata olursa python consoluna error verilir yazdırır
             print(form.errors)
             return render(request, 'RegisterPage.html', {'form': form, 'errors': form.errors})
 

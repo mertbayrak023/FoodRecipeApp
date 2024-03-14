@@ -27,10 +27,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=20, unique=True)
     password = models.CharField(max_length=128)
     email = models.CharField(max_length=50, unique=True)
-    favorites = models.TextField(blank=True, null=True)
-    recipes = models.TextField(blank=True, null=True)
+    favorites = models.BinaryField(blank=True, null=True)
+    recipes = models.BinaryField(blank=True, null=True)
     is_superuser = models.BooleanField()
     last_login = models.DateTimeField(blank=True, null=True)
+    profile_photo = models.TextField(
+        default='https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Default_pfp.svg/340px-Default_pfp.svg.png?20220226140232 ')
 
     objects = UserManager()
 
@@ -56,3 +58,13 @@ class Recipe(models.Model):
     class Meta:
         managed = False
         db_table = 'Recipe'
+
+
+# Favori tablosunun modeli
+class Favorites(models.Model):
+    favoritesid = models.AutoField(primary_key=True)
+    recipeid = models.IntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'Favorites'

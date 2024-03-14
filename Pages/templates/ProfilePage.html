@@ -7,13 +7,68 @@
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 </head>
 <body>
-<!-- Ana Sayfaya donmek icin link -->
-<a href="http://localhost:8000" class="btn btn-primary">Ana Sayfaya Dön</a>
-<!-- Gelistirilecek -->
-<h1>Profilim Burada Olacak</h1>
+<!-- class navbar sayfalar arasında gezmek icin kullandıgımız layout -->
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+        <a href="http://localhost:8000">
+            <img src="https://logowik.com/content/uploads/images/beykoz-universitesi1680.jpg" alt="..."
+                 style="height: 80px;margin-right: 10px;">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="http://localhost:8000">Ana Sayfa</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">En Çok Beğenilen Tarifler</a>
+                </li>
+            </ul>
+            <form class="d-flex" role="search" style="margin-right: 10px">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+            {% if 'userid' in request.session %}
+                <a href="{% url 'logout' %}" class="btn btn-danger" style="margin-right: 10px">Çıkış Yap</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-primary" style="margin-right: 10px">Giriş Yap</a>
+            {% endif %}
+            {% if 'userid' in request.session %}
+                <a href="{% url 'profile' userid=user.userid %}">
+                    <img src="{{ user.profile_photo }}" alt="..." style="width: 35px; height: 35px;border-radius: 50%;">
+                </a>
+            {% else %}
+                <a href="{% url 'login' %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="height: 35px; width: 35px">
+                        <path fill="#006EFD" d="M399 384.2C376.9 345.8 335.4 320 288 320H224c-47.4 0-88.9 25.8-111 64.2c35.2 39.2 86.2 63.8 143 63.8s107.8-24.7 143-63.8zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm256 16a72 72 0 1 0 0-144 72 72 0 1 0 0 144z"></path>
+                    </svg>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+<!-- profil detaylarını belirtmek icin kullandıgımız card -->
+<!-- bu bilgiler Pages\views.py daki def profile'dan gelir -->
+<div class="card mb-3" style="max-width: 540px;">
+    <div class="row g-0">
+        <div class="col-md-4">
+            <img src="{{ user.profile_photo }}" class="img-fluid rounded-start" alt="...">
+        </div>
+        <div class="col-md-8">
+            <div class="card-body">
+                <h5 class="card-title">Kullanıcı Adı = {{ user.username }}</h5>
+                <p class="card-text">E-Posta = {{ user.email }}</p>
+                <p class="card-text">Favori Tarif Sayısı = {{ num_favorites }}</p>
+                <p class="card-text">Eklenen Tarif Sayısı = {{ user.recipes }}</p>
+                <p class="card-text"><small class="text-body-secondary">Last updated 3 mins ago</small></p>
+            </div>
+        </div>
+    </div>
+</div>
 
-<div>{{ user.userid }}</div>
-<div>{{ user.email }}</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
