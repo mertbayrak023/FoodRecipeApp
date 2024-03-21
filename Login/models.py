@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.db import models
 
 
+# Custom user modeli kullandıgımız icin UserManager'i olusturmamızı istiyor django
 class UserManager(BaseUserManager):
     def create_user(self, email, username, password=None, **extra_fields):
         if not email:
@@ -32,7 +33,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField()
     last_login = models.DateTimeField(blank=True, null=True)
     profile_photo = models.TextField(
-        default='https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Default_pfp.svg/340px-Default_pfp.svg.png?20220226140232 ')
+        default='https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Default_pfp.svg/340px-Default_pfp.svg.png'
+                '?20220226140232 ')
 
     objects = UserManager()
 
@@ -50,6 +52,7 @@ class Recipe(models.Model):
     recipe_name = models.CharField(max_length=100)
     description = models.TextField()
     ingredients = models.BinaryField()
+    rating_person = models.IntegerField()
     rating_num = models.IntegerField()
     rating = models.FloatField()
     image = models.BinaryField()

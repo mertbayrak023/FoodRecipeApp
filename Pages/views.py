@@ -15,31 +15,35 @@ def home(request):
 
 
 # Tarif bilgilerini yolluyoruz recipe_id ' sine gore detay sayfasına
-# Yıldız sisteminin matematigi, rating ' e gore half_star ve empty_star_range yolluyoruz
+# Yıldız sisteminin matematigi, rating ' e gore full, half ve empty yolluyoruz
+# Bu degerlere gore html kısmında for loopu ile uygun yıldızları vermek icin kullanıyoruz
+def print_rating(rating_):
+    rating = rating_
+    maximum = 5.0
+    empty = round(maximum - rating)
+    full = int(round(rating, 1))
+    half = (rating % 2) - 1
+
+    if rating == 1.5 or rating == 3.5:
+        return {'empty': range(empty - 1), 'full': range(full), 'half': half}
+
+    else:
+        return {'empty': range(empty), 'full': range(full), 'half': half}
+
+
+# Detay sayfasının def'i
+# rating print_rating 'i cagırır buda bize empty,full ve half degerlerine erisimi verir
 def details(request, recipe_id):
     recipe = get_object_or_404(Recipe, recipe_id=recipe_id)
-    # Yarım yıldız icin gerekli denklem
-    half_star = (recipe.rating % 2) - 1
-    # Bos yildiz icin gerekli denklem
-    empty_star = round(5 - recipe.rating)
-    empty_star_range = range(empty_star)
-    # Kullandıgımız denklem round metodunun  3.5 2.5 ve 1.5 i assagi yuvarlamasından dolayi bu 3 durumda hata verir
-    # Bizde bu 3 durumu ozellikle belirtiyoruz rating e 0.1 ekleyerek ozel durum olmadan cıkarıyoruz
-    # 3.5 'i 3.6 gibi isliyoruz
-    if recipe.rating == 3.5:
-        half_star = ((recipe.rating + 0.1) % 2) - 1
-        empty_star = round(5 - recipe.rating + 0.1)
-        empty_star_range = range(empty_star - 1)
-    if recipe.rating == 2.5:
-        half_star = ((recipe.rating + 0.1) % 2) - 1
-        empty_star = round(5 - recipe.rating + 0.1)
-        empty_star_range = range(empty_star - 1)
-    if recipe.rating == 1.5:
-        half_star = ((recipe.rating + 0.1) % 2) - 1
-        empty_star = round(5 - recipe.rating + 0.1)
-        empty_star_range = range(empty_star - 1)
-    return render(request, 'DetailPage.html',
-                  {'recipe': recipe, 'half_star': half_star, 'empty_star_range': empty_star_range})
+    rating = print_rating(recipe.rating)
+    # ingredients binary tutuldugu icin onun pickle ile stringe ceviriyoruz
+    ingredients_str = remove_bom(recipe.ingredients).decode('utf8') if recipe.ingredients else ""
+    # gelen string [' bu sekilde basladıgı icin biz bunu join ile yeni stringde birlestiriyoruz
+    # Bu sekilde duzgun bir sekilde gosteriyoruz
+    ingredients_list = [ingredient.strip() for ingredient in ingredients_str.split(',') if ingredient.strip()]
+    ingredients = ", ".join(ingredients_list)
+
+    return render(request, 'DetailPage.html', {'recipe': recipe, 'rating': rating, 'ingredients': ingredients})
 
 
 # Binary seklinde depolanan dataya erismek istedigimizde b'\xef\xbb\xbf' bu kisim ile baslar binary sayilari
