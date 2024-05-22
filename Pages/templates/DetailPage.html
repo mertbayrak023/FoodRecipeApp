@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ recipe.recipe_name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        .rating {
+            --dir: right;
+            --fill: gold;
+            --fillbg: rgba(100, 100, 100, 0.15);
+            --star: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 17.25l-6.188 3.75 1.641-7.031-5.438-4.734 7.172-0.609 2.813-6.609 2.813 6.609 7.172 0.609-5.438 4.734 1.641 7.031z"/></svg>');
+            --stars: 5;
+            --starsize: 30px;
+            --symbol: var(--star);
+            --value: {{ recipe.rating }};
+            --w: calc(var(--stars) * var(--starsize));
+            --x: calc(100% * (var(--value) / var(--stars)));
+            block-size: var(--starsize);
+            inline-size: var(--w);
+            position: relative;
+            touch-action: manipulation;
+            -webkit-appearance: none;
+        }
+
+        [dir="rtl"] .rating {
+            --dir: left;
+        }
+
+        .rating::-moz-range-track {
+            background: linear-gradient(to var(--dir), var(--fill) 0 var(--x), var(--fillbg) 0 var(--x));
+            block-size: 100%;
+            mask: repeat left center/var(--starsize) var(--symbol);
+        }
+
+        .rating::-webkit-slider-runnable-track {
+            background: linear-gradient(to var(--dir), var(--fill) 0 var(--x), var(--fillbg) 0 var(--x));
+            block-size: 100%;
+            mask: repeat left center/var(--starsize) var(--symbol);
+            -webkit-mask: repeat left center/var(--starsize) var(--symbol);
+        }
+
+        .rating::-moz-range-thumb {
+            height: var(--starsize);
+            opacity: 0;
+            width: var(--starsize);
+        }
+
+        .rating::-webkit-slider-thumb {
+            height: var(--starsize);
+            opacity: 0;
+            width: var(--starsize);
+            -webkit-appearance: none;
+        }
+
+        .rating {
+            display: block;
+            font-family: ui-sans-serif, system-ui, sans-serif;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            text-decoration: none;
+            color: inherit;
+            font-weight: bolder;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+            color: inherit;
+            font-weight: bolder;
+        }
+
+        .social-media a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .social-media li img {
+            margin-right: 5px;
+        }
+
+        .social-media li:hover {
+            text-decoration: underline;
+        }
+
+        .nav-item:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<!-- class navbar sayfalar arasında gezmek icin kullandıgımız layout -->
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+        <a href="http://localhost:8000">
+            <img src="../../Images_Folder/Images_Folder/Logo.png"
+                 alt="..."
+                 style="height: 80px;margin-right: 10px;">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="http://localhost:8000">Ana Sayfa</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="http://localhost:8000/most_favorites/">En Çok Beğenilen
+                        Tarifler</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="http://localhost:8000/add_recipe/">Tarif Ekle</a>
+                </li>
+                {% if user.is_superuser %}
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'admin' %}">Admin Panel</a>
+                    </li>
+                {% endif %}
+            </ul>
+            <form class="d-flex" role="search" style="margin-right: 10px" action="{% url 'search' %}">
+                <input class="form-control me-2" name="search" type="search" placeholder="Tarif Ara"
+                       aria-label="Search">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+            {% if 'userid' in request.session %}
+                <a href="{% url 'logout' %}" class="btn btn-danger" style="margin-right: 10px">Çıkış Yap</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-primary" style="margin-right: 10px">Giriş Yap</a>
+            {% endif %}
+            {% if 'userid' in request.session %}
+                <a href="{% url 'profile' userid=user.userid %}">
+                    <img src="{{ user.profile_photo_url }}" alt="..."
+                         style="width: 35px; height: 35px;border-radius: 50%;">
+                </a>
+            {% else %}
+                <a href="{% url 'login' %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="height: 35px; width: 35px">
+                        <path fill="#006EFD"
+                              d="M399 384.2C376.9 345.8 335.4 320 288 320H224c-47.4 0-88.9 25.8-111 64.2c35.2 39.2 86.2 63.8 143 63.8s107.8-24.7 143-63.8zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm256 16a72 72 0 1 0 0-144 72 72 0 1 0 0 144z"></path>
+                    </svg>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+<!-- Recipe detaylarını gösteren card classı, css kısımları bootstrapden gelir -->
+<div class="container-fluid"
+     style="justify-content: center; height: 100%;display: flex;align-items: center;margin-top: 10px">
+    <div class="card" style="width: 30rem; margin-bottom: 20px">
+        {% load static %}
+        <img src="{{ recipe.image_url }}" class="card-img-top" alt="..." style="">
+        <div class="card-body">
+            <form method="post" action="{% url 'update_favorite' recipe.recipe_id %}">
+                {% csrf_token %}
+                <h3 class="card-title">{{ recipe.recipe_name }}
+                    <span>
+        {% if 'userid' in request.session %}
+            <!-- Bir tarifin favori olup olmadigini kontrol eden yapi, favori durumuna gore bos yada dolu kalp gosterir -->
+            {% if is_favorite %}
+                <button type="submit"
+                        style="width: fit-content;height: fit-content;border: none;background-color: white">
+               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
+                    style="height: 30px;width: 30px;">
+                <path fill="#ff0000"
+                      d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6109.5z"></path>
+                </svg>
+            </button>
+
+            {% else %}
+                <button type="submit"
+                        style="width: fit-content;height: fit-content;border: none;background-color: white">
+               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
+                    style="height: 30px;width: 30px;">
+                <path fill="#ff0000"
+                      d="M225.8 468.2l-2.5-2.3L48.1 303.2C17.4 274.7 0 234.7 0 192.8v-3.3c0-70.4 50-130.8 119.2-144C158.6 37.9 198.9 47 231 69.6c9 6.4 17.4 13.8 25 22.3c4.2-4.8 8.7-9.2 13.5-13.3c3.7-3.2 7.5-6.2 11.5-9c0 0 0 0 0 0C313.1 47 353.4 37.9 392.8 45.4C462 58.6 512 119.1 512 189.5v3.3c0 41.9-17.4 81.9-48.1 110.4L288.7 465.9l-2.5 2.3c-8.2 7.6-19 11.9-30.2 11.9s-22-4.2-30.2-11.9zM239.1 145c-.4-.3-.7-.7-1-1.1l-17.8-20c0 0-.1-.1-.1-.1c0 0 0 0 0 0c-23.1-25.9-58-37.7-92-31.2C81.6 101.5 48 142.1 48 189.5v3.3c0 28.5 11.9 55.8 32.8 75.2L256 430.7 431.2 268c20.9-19.4 32.8-46.7 32.8-75.2v-3.3c0-47.3-33.6-88-80.1-96.9c-34-6.5-69 5.4-92 31.2c0 0 0 0-.1 .1s0 0-.1 .1l-17.8 20c-.3 .4-.7 .7-1 1.1c-4.5 4.5-10.6 7-16.9 7s-12.4-2.5-16.9-7z"></path>
+            </svg>
+            </button>
+
+            {% endif %}
+        {% else %}
+            <button type="button" id="show_popup_fav"
+                    style="width: fit-content;height: fit-content;border: none;background-color: white">
+               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
+                    style="height: 30px;width: 30px;">
+                <path fill="#ff0000"
+                      d="M225.8 468.2l-2.5-2.3L48.1 303.2C17.4 274.7 0 234.7 0 192.8v-3.3c0-70.4 50-130.8 119.2-144C158.6 37.9 198.9 47 231 69.6c9 6.4 17.4 13.8 25 22.3c4.2-4.8 8.7-9.2 13.5-13.3c3.7-3.2 7.5-6.2 11.5-9c0 0 0 0 0 0C313.1 47 353.4 37.9 392.8 45.4C462 58.6 512 119.1 512 189.5v3.3c0 41.9-17.4 81.9-48.1 110.4L288.7 465.9l-2.5 2.3c-8.2 7.6-19 11.9-30.2 11.9s-22-4.2-30.2-11.9zM239.1 145c-.4-.3-.7-.7-1-1.1l-17.8-20c0 0-.1-.1-.1-.1c0 0 0 0 0 0c-23.1-25.9-58-37.7-92-31.2C81.6 101.5 48 142.1 48 189.5v3.3c0 28.5 11.9 55.8 32.8 75.2L256 430.7 431.2 268c20.9-19.4 32.8-46.7 32.8-75.2v-3.3c0-47.3-33.6-88-80.1-96.9c-34-6.5-69 5.4-92 31.2c0 0 0 0-.1 .1s0 0-.1 .1l-17.8 20c-.3 .4-.7 .7-1 1.1c-4.5 4.5-10.6 7-16.9 7s-12.4-2.5-16.9-7z"></path>
+            </svg>
+            </button>
+            <!-- Giris yapmama durumunda favorilemeyi engellemek icin kullanilinir, popup scripti icin kullanilan divdir-->
+            <div id="popup_fav"
+                 style="position: fixed; display: none; width: 350px; height: 150px; right: 43%; top: 43%;  border: 1px solid grey; align-items: center">
+            <div style="display: flex;align-items: center;">
+                <h3>Favorilemek için giriş yapınız</h3>
+                <svg id="close_popup_fav" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
+                     style="width: 20px;height: 20px;margin-left: 10px">
+                    <path
+                            d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z"></path>
+                </svg>
+            </div>
+            <a href="{% url 'login' %}" class="btn btn-primary" style="margin-right: 10px">Giriş Yap</a>
+        </div>
+        {% endif %}
+                        {% if is_added %}
+                            <a href="{% url "edit_recipe" recipe_id=recipe.recipe_id %}">
+                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="height: 30px;width: 30px;"><path
+                           fill="#643181"
+                           d="M471.6 21.7c-21.9-21.9-57.3-21.9-79.2 0L362.3 51.7l97.9 97.9 30.1-30.1c21.9-21.9 21.9-57.3 0-79.2L471.6 21.7zm-299.2 220c-6.1 6.1-10.8 13.6-13.5 21.9l-29.6 88.8c-2.9 8.6-.6 18.1 5.8 24.6s15.9 8.7 24.6 5.8l88.8-29.6c8.2-2.7 15.7-7.4 21.9-13.5L437.7 172.3 339.7 74.3 172.4 241.7zM96 64C43 64 0 107 0 160V416c0 53 43 96 96 96H352c53 0 96-43 96-96V320c0-17.7-14.3-32-32-32s-32 14.3-32 32v96c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32h96c17.7 0 32-14.3 32-32s-14.3-32-32-32H96z"></path></svg>
+               </a>
+                        {% endif %}
+
+        </span>
+                </h3>
+            </form>
+            <p class="card-text">{{ recipe.description }}</p>
+            <p class="card-text">{{ ingredients }}</p>
+            {% for prep in preparation %}
+                <p class="card-text">{{ forloop.counter }}- {{ prep }}</p>
+            {% endfor %}
+            <p class="card-text">{{ recipe.rating_person }} kisi oy verdi</p>
+            <p class="card-text" style="width: fit-content;">Ortalama puanı: {{ recipe.rating }}/5 </p>
+            <!-- Bir tarifin degerlendirmesine göre yıldız verir -->
+            <!-- for loopunda kullanılan propertyler backend def details'den gelir -->
+            <div id="show_popup" style="width: fit-content">
+                <input
+                        class="rating"
+                        max="5"
+                        step="0.1"
+                        style="--value:{{ recipe.rating }}"
+                        type="range"
+                        value="{{ recipe.rating }}">
+            </div>
+            <br>
+            <h3>Yorumlar</h3>
+            {% if comments|length == 0 %}
+                <p>Bu tarife daha yorum yapilmamis</p>
+            {% else %}
+                {% for comment in comments %}
+                    <p>{{ comment.description }}</p>
+                {% endfor %}
+            {% endif %}
+            <form method="post" action="{% url 'add_comment' recipe.recipe_id %}">
+                {% csrf_token %}
+                <textarea name="new_comment" id="new_comment" placeholder="Yorumunuzu giriniz"
+                          style="width: 100%;height: 90px;resize: none;"></textarea>
+                {% if 'userid' in request.session %}
+                    {% if commentable %}
+                        <button type="submit" class="btn btn-primary">Yorumu Gonder</button>
+                    {% else %}
+                        <button type="button" id="show_popup_commentable" class="btn btn-primary">Yorumu Gonder</button>
+                        <div id="popup_commentable"
+                             style="position: fixed; display: none; width: 350px; height: 150px; right: 43%; top: 43%;  border: 1px solid grey; align-items: center">
+                            <div style="display: flex;align-items: center;">
+                                <h3>Tarife bir kere yorum yapabilirsiniz</h3>
+                                <svg id="close_popup_commentable" xmlns="http://www.w3.org/2000/svg"
+                                     viewBox="0 0 512 512"
+                                     style="width: 20px;height: 20px;margin-left: 10px">
+                                    <path
+                                            d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                {% else %}
+                    <button type="button" id="show_popup_com" class="btn btn-primary">Yorumu Gonder</button>
+                    <!-- Giris yapmama durumunda yorum yapmayi engellemek icin kullanilinir, popup scripti icin kullanilan divdir-->
+                    <div id="popup_com"
+                         style="position: fixed; display: none; width: 350px; height: 150px; right: 43%; top: 43%;  border: 1px solid grey; align-items: center">
+                        <div style="display: flex;align-items: center;">
+                            <h3>Yorum eklemek için giriş yapınız</h3>
+                            <svg id="close_popup_com" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
+                                 style="width: 20px;height: 20px;margin-left: 10px">
+                                <path
+                                        d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z"></path>
+                            </svg>
+                        </div>
+                        <a href="{% url 'login' %}" class="btn btn-primary" style="margin-right: 10px">Giriş Yap</a>
+                    </div>
+                {% endif %}
+
+            </form>
+        </div>
+    </div>
+</div>
+
+{% if 'userid' in request.session %}
+    <form method="post" action="{% url 'update_rating' recipe.recipe_id %}">
+        {% csrf_token %}
+        <div id="popup"
+             style="position: fixed; display: none; width: 350px; height: 150px; right: 43%; top: 43%;  border: 1px solid grey; align-items: center">
+            <div style="display: flex;align-items: center;">
+                <h3>Tarife puanınızı giriniz</h3>
+                <svg id="close_popup" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
+                     style="width: 20px;height: 20px;margin-left: 10px">
+                    <path
+                            d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z"></path>
+                </svg>
+            </div>
+
+            <div style="display: flex; align-items: center">
+                <input
+                        class="rating"
+                        name="rating"
+                        max="5"
+                        oninput="this.style.setProperty('--value', `${this.valueAsNumber}`)"
+                        step="0.1"
+                        style="--value:0"
+                        type="range"
+                        value="0"
+                        id="rating-input">
+                <span id="rating-value" style="margin-left: 10px"></span>
+            </div>
+            <input type="hidden" name="recipe_id" value="{{ recipe.recipe_id }}">
+            <button type="submit" class="btn btn-primary">Puanı Gönder</button>
+        </div>
+    </form>
+{% else %}
+    <!-- Giris yapmama durumunda puanlamayi engellemek icin kullanilinir, popup scripti icin kullanilan divdir-->
+    <div id="popup"
+         style="position: fixed; display: none; width: 350px; height: 150px; right: 43%; top: 43%;  border: 1px solid grey; align-items: center">
+        <div style="display: flex;align-items: center;">
+            <h3>Puanlamak için giriş yapınız</h3>
+            <svg id="close_popup" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
+                 style="width: 20px;height: 20px;margin-left: 10px">
+                <path
+                        d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z"></path>
+            </svg>
+        </div>
+        <a href="{% url 'login' %}" class="btn btn-primary" style="margin-right: 10px">Giriş Yap</a>
+    </div>
+{% endif %}
+
+<footer class="footer" style="border-top: lightgray thin solid;">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 text-sm-center">
+                <a href="{% url "home" %}">
+                    <img src="../../Images_Folder/Images_Folder/Logo.png"
+                         alt="" style="width: auto;height: 150px;" draggable="false">
+                </a>
+                <p>&copy; <b>GustoMeal</b>. All rights reserved.</p>
+            </div>
+            <div class="col-md-6 text-md-right" style="margin-top: 20px">
+                <ul class="footer-links" style="list-style: none;">
+                    <li><a href="{% url "home" %}">Home</a></li>
+                    <li><a href="{% url "most_favorites" %}">En Cok Begenilen Tarifler</a></li>
+                    {% if 'userid' in request.session %}
+                        <li><a href="{% url "profile" userid=user.userid %}">Profile</a></li>
+                    {% else %}
+                        <li><a href="{% url "login" %}">Profile</a></li>
+                    {% endif %}
+                    <li><a href="{% url "add_recipe" %}">Tarif Ekle</a></li>
+                </ul>
+
+                <ul class="social-media"
+                    style="list-style: none;display: flex;flex-wrap: wrap;justify-content: space-between;">
+                    <li>
+                        <a href="https://www.instagram.com/">
+                            <img src="https://mn.nytcdn.com/wp-content/themes/nytheme/dist/assets/img/png/instagram.png"
+                                 alt="">Instagram
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://twitter.com/?hl=tr">
+                            <img src="https://mn.nytcdn.com/wp-content/themes/nytheme/dist/assets/img/svg/twitter(1).svg"
+                                 alt="">Twitter
+                        </a>
+
+                    </li>
+                    <li>
+                        <a href="https://tr-tr.facebook.com/?_=_">
+                            <img src="https://mn.nytcdn.com/wp-content/themes/nytheme/dist/assets/img/svg/facebook(1).svg"
+                                 alt="">Facebook
+                        </a>
+
+                    </li>
+                    <li>
+                        <a href="https://www.youtube.com/">
+                            <img src="https://mn.nytcdn.com/wp-content/themes/nytheme/dist/assets/img/svg/youtube(1).svg"
+                                 alt="">Youtube
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.all.min.js"></script>
+<!-- Tarif Detay sayfasındaki tarife yıldız sistemiyle puan vermek icin tasarlanılıcak bir popup ekranın scripti -->
+<script>
+    const input = document.querySelector('#rating-input');
+    const span = document.querySelector('#rating-value');
+
+    input.addEventListener('input', () => {
+        span.textContent = input.value;
+    });
+</script>
+
+<script>
+    // Tekrarlanilan js kodlaridir, belirtilen id lerle displaylari oynalinir. if lerle kontrol edilerek popup yonetimi yapilir
+    document.getElementById("show_popup").addEventListener("click", function () {
+        document.getElementById("popup").style.display = "block";
+        document.getElementById("popup").style.background = "white";
+    });
+    document.getElementById("close_popup").addEventListener("click", function () {
+        document.getElementById("popup").style.display = "none";
+    });
+
+    document.getElementById("show_popup_fav").addEventListener("click", function () {
+        document.getElementById("popup_fav").style.display = "block";
+        document.getElementById("popup_fav").style.background = "white";
+    });
+    document.getElementById("close_popup_fav").addEventListener("click", function () {
+        document.getElementById("popup_fav").style.display = "none";
+    });
+
+    document.getElementById("show_popup_com").addEventListener("click", function () {
+        document.getElementById("popup_com").style.display = "block";
+        document.getElementById("popup_com").style.background = "white";
+    });
+    document.getElementById("close_popup_com").addEventListener("click", function () {
+        document.getElementById("popup_com").style.display = "none";
+    });
+</script>
+
+<script>
+    document.getElementById("show_popup_commentable").addEventListener("click", function () {
+        document.getElementById("popup_commentable").style.display = "block";
+        document.getElementById("popup_commentable").style.background = "white";
+    });
+    document.getElementById("close_popup_commentable").addEventListener("click", function () {
+        document.getElementById("popup_commentable").style.display = "none";
+    });
+</script>
+
+</body>
+</html>

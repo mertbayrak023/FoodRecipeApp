@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ayarlar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<style>
+    .footer-links li {
+        margin-bottom: 10px;
+    }
+
+    .footer-links a {
+        text-decoration: none;
+        color: inherit;
+        font-weight: bolder;
+    }
+
+    .footer-links a:hover {
+        text-decoration: underline;
+        color: inherit;
+        font-weight: bolder;
+    }
+
+    .social-media a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .social-media li img {
+        margin-right: 5px;
+    }
+
+    .social-media li:hover {
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+    .nav-item:hover {
+        text-decoration: underline;
+    }
+</style>
+<body>
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+        <a href="http://localhost:8000">
+            <img src="../../Images_Folder/Images_Folder/Logo.png"
+                 alt="..."
+                 style="height: 80px;margin-right: 10px;">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="http://localhost:8000">Ana Sayfa</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="http://localhost:8000/most_favorites/">En Çok Beğenilen
+                        Tarifler</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="http://localhost:8000/add_recipe/">Tarif Ekle</a>
+                </li>
+                {% if user.is_superuser %}
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'admin' %}">Admin Panel</a>
+                    </li>
+                {% endif %}
+            </ul>
+            <form class="d-flex" role="search" style="margin-right: 10px" action="{% url 'search' %}">
+                <input class="form-control me-2" name="search" type="search" placeholder="Tarif Ara" aria-label="Search">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+            {% if 'userid' in request.session %}
+                <a href="{% url 'logout' %}" class="btn btn-danger" style="margin-right: 10px">Çıkış Yap</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-primary" style="margin-right: 10px">Giriş Yap</a>
+            {% endif %}
+            {% if 'userid' in request.session %}
+                <a href="{% url 'profile' userid=user.userid %}">
+                    <img src="{{ user.profile_photo_url }}" alt="..." style="width: 35px; height: 35px;border-radius: 50%;">
+                </a>
+            {% else %}
+                <a href="{% url 'login' %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="height: 35px; width: 35px">
+                        <path fill="#006EFD"
+                              d="M399 384.2C376.9 345.8 335.4 320 288 320H224c-47.4 0-88.9 25.8-111 64.2c35.2 39.2 86.2 63.8 143 63.8s107.8-24.7 143-63.8zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm256 16a72 72 0 1 0 0-144 72 72 0 1 0 0 144z"></path>
+                    </svg>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid" style="justify-content: center; height: 100%;display: flex;align-items: center;margin-top: 10px;margin-bottom: 20px">
+    <div class="card text-center" style="width: 20rem; margin: 0 auto;">
+        <!--Ayarlar formu enctype diyerek fotograf dosyasinida alabiliyoruz -->
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="input-group" style="padding: 15px">
+                <div class="mb-3">
+                    <div id="preview" style="margin: 10px"><img src="{{ user.profile_photo_url }}" alt=""
+                                                                style="width: 100%"></div>
+                    <label for="formFile" class="form-label">Profil Fotografi</label>
+                    <input class="form-control" type="file" accept="image/png, image/jpg, image/jpeg" id="formFile"
+                           name="image">
+                </div>
+            </div>
+
+            <div class="input-group" style="padding: 15px">
+                <input type="text" name="username" class="form-control" placeholder="{{ user.username }}"
+                       aria-label="Username" aria-describedby="basic-addon1">
+            </div>
+
+            <div class="input-group" style="padding: 15px">
+                <input type="text" name="email" class="form-control" placeholder="{{ user.email }}"
+                       aria-label="Email" aria-describedby="basic-addon1">
+            </div>
+
+            <div class="card-body" style="padding: 15px">
+                <button type="button" id="show_popup" class="btn btn-primary">Sifre Degistir</button>
+            </div>
+
+            <div id="popup"
+                 style="position: fixed; display: none; width: 350px; height: fit-content; right: 34%; top: 34%;  border: 1px solid grey; align-items: center">
+                <svg id="close_popup" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
+                     style="width: 20px;height: 20px;margin-left: 10px">
+                    <path
+                            d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z"></path>
+                </svg>
+
+                <div>
+                    <div class="input-group" style="padding: 15px">
+                        <input type="password" name="password_old" class="form-control" placeholder="Eski Sifre"
+                               aria-label="Password_old" aria-describedby="basic-addon1">
+                    </div>
+
+                    <div class="input-group" style="padding: 15px">
+                        <input type="password" name="password_new1" class="form-control" placeholder="Yeni Sifre"
+                               aria-label="Password_new1" aria-describedby="basic-addon1">
+                    </div>
+
+                    <div class="input-group" style="padding: 15px">
+                        <input type="password" name="password_new2" class="form-control" placeholder="Yeni Sifre Tekrar"
+                               aria-label="Password_new2" aria-describedby="basic-addon1">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-bottom: 10px">Sifreyi Kaydet</button>
+            </div>
+
+            <div class="card-body">
+                <button type="submit" class="btn btn-primary">Degisikleri Kaydet</button>
+                <br>
+                <button name="delete_button" type="submit" class="btn btn-danger" style="margin-top: 10px" value="1">Profili Sil</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<footer class="footer" style="border-top: lightgray thin solid;">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 text-sm-center">
+                <a href="{% url "home" %}">
+                    <img src="../../Images_Folder/Images_Folder/Logo.png"
+                         alt="" style="width: auto;height: 150px;" draggable="false">
+                </a>
+                <p>&copy; <b>GustoMeal</b>. All rights reserved.</p>
+            </div>
+            <div class="col-md-6 text-md-right" style="margin-top: 20px">
+                <ul class="footer-links" style="list-style: none;">
+                    <li><a href="{% url "home" %}">Home</a></li>
+                    <li><a href="{% url "most_favorites" %}">En Cok Begenilen Tarifler</a></li>
+                    {% if 'userid' in request.session %}
+                        <li><a href="{% url "profile" userid=user.userid %}">Profile</a></li>
+                    {% else %}
+                        <li><a href="{% url "login" %}">Profile</a></li>
+                    {% endif %}
+                    <li><a href="{% url "add_recipe" %}">Tarif Ekle</a></li>
+                </ul>
+
+                <ul class="social-media"
+                    style="list-style: none;display: flex;flex-wrap: wrap;justify-content: space-between;">
+                    <li>
+                        <a href="https://www.instagram.com/">
+                            <img src="https://mn.nytcdn.com/wp-content/themes/nytheme/dist/assets/img/png/instagram.png"
+                                 alt="">Instagram
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://twitter.com/?hl=tr">
+                            <img src="https://mn.nytcdn.com/wp-content/themes/nytheme/dist/assets/img/svg/twitter(1).svg"
+                                 alt="">Twitter
+                        </a>
+
+                    </li>
+                    <li>
+                        <a href="https://tr-tr.facebook.com/?_=_">
+                            <img src="https://mn.nytcdn.com/wp-content/themes/nytheme/dist/assets/img/svg/facebook(1).svg"
+                                 alt="">Facebook
+                        </a>
+
+                    </li>
+                    <li>
+                        <a href="https://www.youtube.com/">
+                            <img src="https://mn.nytcdn.com/wp-content/themes/nytheme/dist/assets/img/svg/youtube(1).svg"
+                                 alt="">Youtube
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+<script>
+    const fileInput = document.getElementById('formFile')
+    const previewDiv = document.getElementById('preview')
+
+    fileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+
+        reader.addEventListener('load', () => {
+            const img = document.createElement('img');
+            img.src = reader.result;
+            img.style.width = '100%'
+            previewDiv.innerHTML = '';
+            previewDiv.appendChild(img);
+        });
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+
+<script>
+    document.getElementById("show_popup").addEventListener("click", function () {
+        document.getElementById("popup").style.display = "block";
+        document.getElementById("popup").style.background = "grey";
+    });
+    document.getElementById("close_popup").addEventListener("click", function () {
+        document.getElementById("popup").style.display = "none";
+    });
+</script>
+</body>
+</html>

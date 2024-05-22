@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ user.username }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<style>
+    .footer-links li {
+        margin-bottom: 10px;
+    }
+
+    .footer-links a {
+        text-decoration: none;
+        color: inherit;
+        font-weight: bolder;
+    }
+
+    .footer-links a:hover {
+        text-decoration: underline;
+        color: inherit;
+        font-weight: bolder;
+    }
+
+    .social-media a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .social-media li img {
+        margin-right: 5px;
+    }
+
+    .social-media li:hover {
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+    .nav-item:hover {
+        text-decoration: underline;
+    }
+</style>
+<body>
+<!-- class navbar sayfalar arasında gezmek icin kullandıgımız layout -->
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+        <a href="http://localhost:8000">
+            <img src="../../Images_Folder/Images_Folder/Logo.png"
+                 alt="..."
+                 style="height: 80px;margin-right: 10px;">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="http://localhost:8000">Ana Sayfa</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="http://localhost:8000/most_favorites/">En Çok Beğenilen
+                        Tarifler</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="http://localhost:8000/add_recipe/">Tarif Ekle</a>
+                </li>
+                {% if user.is_superuser %}
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'admin' %}">Admin Panel</a>
+                    </li>
+                {% endif %}
+            </ul>
+            <form class="d-flex" role="search" style="margin-right: 10px" action="{% url 'search' %}">
+                <input class="form-control me-2" name="search" type="search" placeholder="Tarif Ara"
+                       aria-label="Search">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+            {% if 'userid' in request.session %}
+                <a href="{% url 'logout' %}" class="btn btn-danger" style="margin-right: 10px">Çıkış Yap</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-primary" style="margin-right: 10px">Giriş Yap</a>
+            {% endif %}
+            {% if 'userid' in request.session %}
+                <a href="{% url 'profile' userid=user.userid %}">
+                    <img src="{{ user.profile_photo_url }}" alt="..."
+                         style="width: 35px; height: 35px;border-radius: 50%;">
+                </a>
+            {% else %}
+                <a href="{% url 'login' %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="height: 35px; width: 35px">
+                        <path fill="#006EFD"
+                              d="M399 384.2C376.9 345.8 335.4 320 288 320H224c-47.4 0-88.9 25.8-111 64.2c35.2 39.2 86.2 63.8 143 63.8s107.8-24.7 143-63.8zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm256 16a72 72 0 1 0 0-144 72 72 0 1 0 0 144z"></path>
+                    </svg>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<!-- profil detaylarını belirtmek icin kullandıgımız card -->
+<!-- bu bilgiler Pages\views.py daki def profile'dan gelir -->
+<div class="card mb-3" style="max-width: 540px;margin-top: 10px;margin-left: 10px">
+    <div class="row g-0">
+        <div class="col-md-4">
+            <img src="{{ user.profile_photo_url }}" class="img-fluid rounded-start" alt="...">
+        </div>
+        <div class="col-md-8">
+            <div class="card-body">
+                <h5 class="card-title">Kullanıcı Adı = {{ user.username }} <span>
+                    <a href="{% url 'options' userid=user.userid %}">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             style="height: 40px;width: 40px;margin-left: 100px"
+                             viewBox="0 0 512 512"><path
+                                fill="#643181"
+                                d="M495.9 166.6c3.2 8.7 .5 18.4-6.4 24.6l-43.3 39.4c1.1 8.3 1.7 16.8 1.7 25.4s-.6 17.1-1.7 25.4l43.3 39.4c6.9 6.2 9.6 15.9 6.4 24.6c-4.4 11.9-9.7 23.3-15.8 34.3l-4.7 8.1c-6.6 11-14 21.4-22.1 31.2c-5.9 7.2-15.7 9.6-24.5 6.8l-55.7-17.7c-13.4 10.3-28.2 18.9-44 25.4l-12.5 57.1c-2 9.1-9 16.3-18.2 17.8c-13.8 2.3-28 3.5-42.5 3.5s-28.7-1.2-42.5-3.5c-9.2-1.5-16.2-8.7-18.2-17.8l-12.5-57.1c-15.8-6.5-30.6-15.1-44-25.4L83.1 425.9c-8.8 2.8-18.6 .3-24.5-6.8c-8.1-9.8-15.5-20.2-22.1-31.2l-4.7-8.1c-6.1-11-11.4-22.4-15.8-34.3c-3.2-8.7-.5-18.4 6.4-24.6l43.3-39.4C64.6 273.1 64 264.6 64 256s.6-17.1 1.7-25.4L22.4 191.2c-6.9-6.2-9.6-15.9-6.4-24.6c4.4-11.9 9.7-23.3 15.8-34.3l4.7-8.1c6.6-11 14-21.4 22.1-31.2c5.9-7.2 15.7-9.6 24.5-6.8l55.7 17.7c13.4-10.3 28.2-18.9 44-25.4l12.5-57.1c2-9.1 9-16.3 18.2-17.8C227.3 1.2 241.5 0 256 0s28.7 1.2 42.5 3.5c9.2 1.5 16.2 8.7 18.2 17.8l12.5 57.1c15.8 6.5 30.6 15.1 44 25.4l55.7-17.7c8.8-2.8 18.6-.3 24.5 6.8c8.1 9.8 15.5 20.2 22.1 31.2l4.7 8.1c6.1 11 11.4 22.4 15.8 34.3zM256 336a80 80 0 1 0 0-160 80 80 0 1 0 0 160z"></path></svg>
+                    </a>
+                    </span>
+                </h5>
+                <p class="card-text">E-Posta = {{ user.email }}</p>
+                <p class="card-text">Favori Tarif Sayısı = {{ num_favorites }}</p>
+                <p class="card-text">Eklenen Tarif Sayısı = {{ num_recipes }}</p>
+                <p class="card-text"><small class="text-body-secondary">Last updated 3 mins ago</small></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ul class="nav nav-pills" style="margin-left: 10px">
+    <li class="nav-item" style="text-decoration: none;margin-right: 10px">
+        <a class="nav-link active" href="#" id="favorites_button"><h3>Favori Tarifler</h3></a>
+    </li>
+    <li class="nav-item" style="text-decoration: none;">
+        <a class="nav-link" href="#" id="recipes_button"><h3>Eklediğin Tarifler</h3></a>
+    </li>
+</ul>
+
+<!-- Favori Tarifleri gosteren card -->
+<div id="favorites">
+    {% if num_favorites == 0 %}
+        <h5>Henüz favori tarif eklemediniz</h5>
+    {% else %}
+        <div class="row row-cols-2 row-cols-md-5 g-1">
+            {% for favorite in favorites %}
+                <div class="col">
+                    <div class="card" style="margin: 10px">
+                        <img src="{{ favorite.image_url }}" class="card-img-top" alt="..." width="192px" height="262px">
+                        <div class="card-body w-192 h-200">
+                            <h5 class="card-title text-center">{{ favorite.recipe_name }}</h5>
+                            <p class="card-text">{{ favorite.description }}</p>
+                            <a href="{% url 'details' favorite.recipe_id %}" class="btn btn-primary">Tarif Detayını
+                                Gör</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+<div id="recipes" style="display: none">
+    <!-- Kullanıcının ekledigi tarifleri gosteren card -->
+    {% if num_recipes == 0 %}
+        <h5>Henüz tarif eklemediniz</h5>
+    {% else %}
+        <div class="row row-cols-2 row-cols-md-5 g-1">
+            {% for recipe in recipes %}
+                <div class="col">
+                    <div class="card" style="margin: 10px">
+                        <img src="{{ recipe.image_url }}" class="card-img-top" alt="..." width="192px" height="262px">
+                        <div class="card-body w-192 h-200">
+                            <h5 class="card-title text-center">{{ recipe.recipe_name }}</h5>
+                            <p class="card-text">{{ recipe.description }}</p>
+                            <a href="{% url 'details' recipe.recipe_id %}" class="btn btn-primary">Tarif Detayını
+                                Gör</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+
+<footer class="footer" style="border-top: lightgray thin solid;">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 text-sm-center">
+                <a href="{% url "home" %}">
+                    <img src="../../Images_Folder/Images_Folder/Logo.png"
+                         alt="" style="width: auto;height: 150px;" draggable="false">
+                </a>
+                <p>&copy; <b>GustoMeal</b>. All rights reserved.</p>
+            </div>
+            <div class="col-md-6 text-md-right" style="margin-top: 20px">
+                <ul class="footer-links" style="list-style: none;">
+                    <li><a href="{% url "home" %}">Home</a></li>
+                    <li><a href="{% url "most_favorites" %}">En Cok Begenilen Tarifler</a></li>
+                    {% if 'userid' in request.session %}
+                        <li><a href="{% url "profile" userid=user.userid %}">Profile</a></li>
+                    {% else %}
+                        <li><a href="{% url "login" %}">Profile</a></li>
+                    {% endif %}
+                    <li><a href="{% url "add_recipe" %}">Tarif Ekle</a></li>
+                </ul>
+
+                <ul class="social-media"
+                    style="list-style: none;display: flex;flex-wrap: wrap;justify-content: space-between;">
+                    <li>
+                        <a href="https://www.instagram.com/">
+                            <img src="https://mn.nytcdn.com/wp-content/themes/nytheme/dist/assets/img/png/instagram.png"
+                                 alt="">Instagram
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://twitter.com/?hl=tr">
+                            <img src="https://mn.nytcdn.com/wp-content/themes/nytheme/dist/assets/img/svg/twitter(1).svg"
+                                 alt="">Twitter
+                        </a>
+
+                    </li>
+                    <li>
+                        <a href="https://tr-tr.facebook.com/?_=_">
+                            <img src="https://mn.nytcdn.com/wp-content/themes/nytheme/dist/assets/img/svg/facebook(1).svg"
+                                 alt="">Facebook
+                        </a>
+
+                    </li>
+                    <li>
+                        <a href="https://www.youtube.com/">
+                            <img src="https://mn.nytcdn.com/wp-content/themes/nytheme/dist/assets/img/svg/youtube(1).svg"
+                                 alt="">Youtube
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+<script>
+    const recipe_button = document.getElementById('recipes_button');
+    const recipe_div = document.getElementById('recipes');
+    const favori_button = document.getElementById('favorites_button');
+    const favori_div = document.getElementById('favorites');
+
+    recipe_button.addEventListener('click', () => {
+        recipe_button.classList.add('active');
+        favori_button.classList.remove('active');
+        recipe_div.style.display = '';
+        favori_div.style.display = 'none';
+    });
+
+    favori_button.addEventListener('click', () => {
+        recipe_button.classList.remove('active');
+        favori_button.classList.add('active')
+        recipe_div.style.display = 'none';
+        favori_div.style.display = '';
+    });
+</script>
+</body>
+</html>
